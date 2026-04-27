@@ -18,12 +18,17 @@ jobs:
           - platform: windows/amd64
             arch-name: windows-amd64
             os: windows-latest
+          - platform: macos/amd64
+            arch-name: macos-amd64
+            os: macos-latest
+          - platform: macos/arm64
+            arch-name: macos-arm64
+            os: macos-14
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # --- ÉTAPES LINUX (DOCKER) ---
       - name: Set up QEMU
         if: runner.os == 'Linux'
         uses: docker/setup-qemu-action@v3
@@ -41,19 +46,22 @@ jobs:
             --output type=local,dest=./out \
             .
 
-      # --- ÉTAPES WINDOWS (CARGO DIRECT) ---
       - name: Install Rust
-        if: runner.os == 'Windows'
+        if: runner.os != 'Linux'
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Build with Cargo (Windows)
-        if: runner.os == 'Windows'
+      - name: Build with Cargo (Windows & macOS)
+        if: runner.os != 'Linux'
         run: |
           cargo build --release
-          mkdir out
-          cp target/release/encrypted_folders.exe out/encrypted_folders.exe
+          mkdir -p out
+          if [ "${{ runner.os }}" == "Windows" ]; then
+            cp target/release/encrypted_folders.exe out/encrypted_folders.exe
+          else
+            cp target/release/encrypted_folders out/encrypted_folders
+          fi
+        shell: bash
 
-      # --- FINALISATION ---
       - name: Rename binary
         shell: bash
         run: |

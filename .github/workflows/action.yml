@@ -13,6 +13,9 @@ jobs:
             arch-name: amd64
           - platform: linux/arm64
             arch-name: arm64
+          - platform: windows/amd64
+            arch-name: windows-amd64
+            os: windows-latest
 
     steps:
       - name: Checkout code
